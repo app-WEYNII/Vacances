@@ -1,7 +1,7 @@
 // Mes Notes — Service Worker
 // Pattern: bump CACHE_VERSION on each release to force update.
 
-const CACHE_VERSION = 'v6';
+const CACHE_VERSION = 'v7';
 const CACHE_NAME = `mes-notes-${CACHE_VERSION}`;
 
 const ASSETS = [
