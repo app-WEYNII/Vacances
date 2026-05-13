@@ -10,14 +10,14 @@
 <meta name="theme-color" content="#f5f1ea" />
 <meta name="color-scheme" content="light" />
 <link rel="manifest" href="manifest.webmanifest" />
-<link rel="apple-touch-icon" href="icon-180.png" />
-<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png" />
-<link rel="apple-touch-icon" sizes="167x167" href="icon-167.png" />
-<link rel="apple-touch-icon" sizes="152x152" href="icon-152.png" />
-<link rel="apple-touch-icon" sizes="120x120" href="icon-120.png" />
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
-<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png" />
-<link rel="shortcut icon" type="image/png" href="icon-192.png" />
+<link rel="apple-touch-icon" href="icons/icon-180.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+<link rel="apple-touch-icon" sizes="167x167" href="icons/icon-167.png" />
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png" />
+<link rel="apple-touch-icon" sizes="120x120" href="icons/icon-120.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png" />
+<link rel="shortcut icon" type="image/png" href="icons/icon-192.png" />
 <title>Mes Notes — Séjour</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -593,6 +593,71 @@ label { display: block; font-size: 12px; text-transform: uppercase; letter-spaci
   font-size: 20px; color: var(--muted);
 }
 
+/* Payment method toggle (Espèces / Carte) */
+.pay-toggle {
+  display: flex; gap: 6px;
+  background: var(--sand-2);
+  padding: 4px;
+  border-radius: 14px;
+  margin-bottom: 18px;
+}
+.pay-opt {
+  flex: 1; padding: 11px 8px;
+  border-radius: 10px;
+  font-size: 14px; font-weight: 500;
+  color: var(--ink-soft);
+  background: transparent;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+}
+.pay-opt .ic { font-size: 16px; line-height: 1; }
+.pay-opt.active {
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(26,46,46,0.06);
+  font-weight: 600;
+}
+.pay-opt[data-pay="card"].active { color: var(--coral-dark); }
+
+/* Card badge on expense items */
+.pay-tag {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: rgba(217,119,87,0.10);
+  color: var(--coral-dark);
+  padding: 1px 7px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* Card info line under budget block */
+.budget-card-info {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
+  margin-top: 12px; padding-top: 10px;
+  border-top: 1px dashed var(--line);
+  font-size: 12px; color: var(--ink-soft);
+}
+.budget-card-info .label { display: inline-flex; align-items: center; gap: 5px; }
+.budget-card-info b {
+  color: var(--coral-dark); font-weight: 600;
+  font-family: 'Fraunces', serif; font-style: italic;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.budget-card-info .hint { color: var(--muted); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; }
+
+/* Hero pay split (when no budget set, or as supplementary info) */
+.hero-pay-split {
+  margin-top: 10px;
+  display: flex; gap: 14px; flex-wrap: wrap;
+  font-size: 13px; color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+.hero-pay-split .seg { display: inline-flex; align-items: center; gap: 5px; }
+.hero-pay-split b { color: var(--ink); font-weight: 600; }
+.hero-pay-split .seg.card b { color: var(--coral-dark); }
+
 /* Category grid */
 .cat-grid {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
@@ -751,6 +816,10 @@ body::before {
     <div class="label-total">Total du séjour</div>
     <div class="total mono-num"><span id="hero-total">0,00</span><span class="cur" id="hero-cur">€</span></div>
     <div class="eur-equiv" id="hero-eur" style="display:none"><span class="approx">≈</span><span id="hero-eur-val">0,00 €</span></div>
+    <div class="hero-pay-split" id="hero-pay-split" style="display:none">
+      <span class="seg cash">💵 <b id="hero-cash-val">0</b></span>
+      <span class="seg card">💳 <b id="hero-card-val">0</b></span>
+    </div>
     <div class="meta">
       <span><b id="meta-count">0</b> dépenses</span>
       <span><b id="meta-days">0</b> j actifs</span>
@@ -788,6 +857,15 @@ body::before {
       <span class="amount-cur" id="exp-cur">€</span>
     </div>
     <div class="amount-eur-eq" id="amount-eur-eq"></div>
+
+    <div class="pay-toggle" role="group" aria-label="Mode de paiement">
+      <button type="button" class="pay-opt active" data-pay="cash">
+        <span class="ic">💵</span><span>Espèces</span>
+      </button>
+      <button type="button" class="pay-opt" data-pay="card">
+        <span class="ic">💳</span><span>Carte</span>
+      </button>
+    </div>
 
     <div class="cat-grid" id="cat-grid"></div>
 
@@ -996,7 +1074,11 @@ function load() {
   if (!state._v && state.trip.budget > 0 && state.trip.currency !== 'EUR' && state.trip.eurRate > 0) {
     state.trip.budget = Math.round(state.trip.budget * state.trip.eurRate);
   }
-  state._v = 2;
+  // v2 -> v3: add paymentMethod to existing expenses (default 'cash')
+  state.expenses.forEach(e => {
+    if (!e.paymentMethod) e.paymentMethod = 'cash';
+  });
+  state._v = 3;
 }
 function save() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
@@ -1045,17 +1127,25 @@ function fmtEurEq(amount, opts = {}) {
   if (eur === null) return '';
   return '≈ ' + fmtEur(eur, opts) + ' €';
 }
-// Returns null if no budget set, or {budget, spent, remaining, pct, over} - all in trip currency
+// Helpers for payment-method splits.
+function isCash(e) { return (e.paymentMethod || 'cash') === 'cash'; }
+function isCard(e) { return e.paymentMethod === 'card'; }
+function sumCash(list)  { return list.filter(isCash).reduce((s,e)=>s+e.amount, 0); }
+function sumCard(list)  { return list.filter(isCard).reduce((s,e)=>s+e.amount, 0); }
+function sumAll(list)   { return list.reduce((s,e)=>s+e.amount, 0); }
+
+// Returns null if no budget set, or {budget, spent, remaining, pct, over} - all in trip currency.
+// IMPORTANT: budget only tracks CASH expenses. Card payments are off-budget.
 function budgetProgress() {
   const budget = state.trip.budget || 0;
   if (budget <= 0) return null;
-  const totalSpent = state.expenses.reduce((s, e) => s + e.amount, 0);
+  const cashSpent = sumCash(state.expenses);
   return {
     budget,
-    spent: totalSpent,
-    remaining: budget - totalSpent,
-    pct: budget > 0 ? (totalSpent / budget * 100) : 0,
-    over: totalSpent > budget,
+    spent: cashSpent,
+    remaining: budget - cashSpent,
+    pct: budget > 0 ? (cashSpent / budget * 100) : 0,
+    over: cashSpent > budget,
   };
 }
 
@@ -1253,7 +1343,9 @@ function renderAll() {
 }
 
 function renderHero() {
-  const total = state.expenses.reduce((s, e) => s + e.amount, 0);
+  const total = sumAll(state.expenses);
+  const cardTotal = sumCard(state.expenses);
+  const cashTotal = total - cardTotal;
   document.getElementById('hero-total').textContent = fmtMoney(total);
   document.getElementById('hero-cur').textContent = curSym();
   document.getElementById('topbar-trip').textContent = state.trip.name;
@@ -1265,6 +1357,16 @@ function renderHero() {
     document.getElementById('hero-eur-val').textContent = fmtEur(toEur(total)) + ' €';
   } else {
     eurEq.style.display = 'none';
+  }
+
+  // Cash/Card split (only shown when there's at least one card payment)
+  const splitEl = document.getElementById('hero-pay-split');
+  if (cardTotal > 0) {
+    splitEl.style.display = '';
+    document.getElementById('hero-cash-val').textContent = fmtMoney(cashTotal, {noDec:true}) + ' ' + curSym();
+    document.getElementById('hero-card-val').textContent = fmtMoney(cardTotal, {noDec:true}) + ' ' + curSym();
+  } else {
+    splitEl.style.display = 'none';
   }
 
   const info = tripDayInfo();
@@ -1322,9 +1424,9 @@ function renderBudgetBlock() {
       remLabel = 'Reste / jour';
       remVal = `${fmtMoney(dailyTarget, {noDec:true})} ${cur}`;
     } else {
-      // Trip in progress: show how much is left for TODAY against today's target
+      // Trip in progress: show how much is left for TODAY against today's target (CASH only).
       const todayISOStr = todayISO();
-      const todaySpent = state.expenses.filter(e => e.date === todayISOStr).reduce((s,e)=>s+e.amount, 0);
+      const todaySpent = sumCash(state.expenses.filter(e => e.date === todayISOStr));
       const remainingToday = dailyTarget - todaySpent;
       remLabel = 'Reste aujourd\'hui';
       remWarn = remainingToday < dailyTarget * 0.2; // <20% of daily target left
@@ -1350,9 +1452,21 @@ function renderBudgetBlock() {
     `;
   }
 
+  // Card spending (off-budget) info
+  const cardTotal = sumCard(state.expenses);
+  let cardHtml = '';
+  if (cardTotal > 0) {
+    cardHtml = `
+      <div class="budget-card-info">
+        <span class="label">💳 Dont <b>${fmtMoney(cardTotal, {noDec:true})} ${cur}</b> par carte</span>
+        <span class="hint">hors budget</span>
+      </div>
+    `;
+  }
+
   block.innerHTML = `
     <div class="budget-head">
-      <span class="lbl">Budget</span>
+      <span class="lbl">Budget espèces</span>
       <span class="val mono-num"><b>${fmtMoney(bp.spent, {noDec:true})}</b> / ${fmtMoney(bp.budget, {noDec:true})} ${cur}</span>
     </div>
     <div class="budget-bar-wrap"><div class="budget-bar-fill ${barClass}" style="width:${pct}%"></div></div>
@@ -1361,6 +1475,7 @@ function renderBudgetBlock() {
       ${footRight}
     </div>
     ${dailyHtml}
+    ${cardHtml}
   `;
 }
 
@@ -1427,6 +1542,7 @@ function renderToday() {
 function renderExpItem(e) {
   const c = getCat(e.category);
   const hotel = state.hotels.find(h => h.id === e.hotelId);
+  const card = isCard(e);
   return `
     <div class="exp-item" data-id="${e.id}">
       <div class="exp-cat-icon">${c.ic}</div>
@@ -1435,6 +1551,7 @@ function renderExpItem(e) {
         <div class="exp-sub">
           <span>${c.label}</span>
           ${hotel ? `<span>· ${escapeHtml(hotel.name)}</span>` : ''}
+          ${card ? `<span class="pay-tag">💳 Carte</span>` : ''}
         </div>
       </div>
       <div class="exp-amount mono-num">${fmtMoney(e.amount)} ${curSym()}</div>
@@ -1553,7 +1670,8 @@ function renderStats() {
     `;
   }).join('');
 
-  // Daily breakdown over full trip range
+  // Daily breakdown over full trip range.
+  // Amounts here are CASH-only since the daily bars are compared against the daily cash target.
   let dailyHtml = '';
   if (info) {
     const days = [];
@@ -1561,8 +1679,9 @@ function renderStats() {
     for (let i = 0; i < info.total; i++) {
       const d = new Date(start); d.setDate(d.getDate()+i);
       const iso = d.toISOString().slice(0,10);
-      const t = state.expenses.filter(e=>e.date===iso).reduce((s,e)=>s+e.amount,0);
-      days.push({ iso, total: t });
+      const cashT = sumCash(state.expenses.filter(e=>e.date===iso));
+      const cardT = sumCard(state.expenses.filter(e=>e.date===iso));
+      days.push({ iso, total: cashT, card: cardT });
     }
     const maxD = Math.max(...days.map(d=>d.total), 1);
     // If a budget is set, use the daily target as the bar reference (100% = target).
@@ -1581,7 +1700,8 @@ function renderStats() {
       const targetLine = dailyTarget && dailyTarget > 0 && !isOver
         ? `<div class="daily-bar-target" style="left:100%"></div>` : '';
       const overBadge = isOver ? `<span class="over-pct">+${overPct.toFixed(0)}%</span>` : '';
-      const amountTxt = d.total === 0 ? '—' : fmtMoney(d.total) + ' ' + curSym();
+      const cardBadge = d.card > 0 ? `<span class="over-pct" style="color:var(--coral-dark);opacity:0.85">+ 💳 ${fmtMoney(d.card, {noDec:true})}</span>` : '';
+      const amountTxt = (d.total === 0 && d.card === 0) ? '—' : (d.total === 0 ? '0' : fmtMoney(d.total)) + ' ' + curSym();
       return `
         <div class="daily-row">
           <div class="daily-date">${escapeHtml(fmtDateMed(d.iso))}</div>
@@ -1589,7 +1709,7 @@ function renderStats() {
             <div class="daily-bar-fill ${isOver?'over':''}" style="width:${barW.toFixed(1)}%"></div>
             ${targetLine}
           </div>
-          <div class="daily-amount mono-num ${d.total===0?'zero':''} ${isOver?'is-over':''}">${amountTxt}${overBadge}</div>
+          <div class="daily-amount mono-num ${d.total===0 && d.card===0?'zero':''} ${isOver?'is-over':''}">${amountTxt}${overBadge}${overBadge?'':cardBadge}</div>
         </div>
       `;
     }).join('');
@@ -1598,17 +1718,18 @@ function renderStats() {
   const totalEurStr = fmtEurEq(total);
   const avgEurStr = fmtEurEq(avg);
 
-  // Projection at current pace
+  // Projection at current pace — CASH only, to stay consistent with the cash budget.
   let projHtml = '';
   if (info && info.started && !info.ended && state.expenses.length > 0) {
+    const cashTotalAll = sumCash(state.expenses);
     const daysSoFar = Math.max(1, info.day);
-    const pacePrimary = total / daysSoFar;
+    const pacePrimary = cashTotalAll / daysSoFar;
     const projectedPrimary = pacePrimary * info.total;
     const projectedEurStr = fmtEurEq(projectedPrimary, {noDec:true});
     let projNote = '';
     if (bp) {
       if (projectedPrimary > bp.budget) {
-        projNote = `<div style="margin-top:8px;font-size:13px;color:var(--coral-dark);font-weight:500;">↑ Dépassement projeté de ${fmtMoney(projectedPrimary - bp.budget, {noDec:true})} ${curSym()}</div>`;
+        projNote = `<div style="margin-top:8px;font-size:13px;color:var(--coral-dark);font-weight:500;">↑ Dépassement budget projeté : ${fmtMoney(projectedPrimary - bp.budget, {noDec:true})} ${curSym()}</div>`;
       } else {
         projNote = `<div style="margin-top:8px;font-size:13px;color:var(--teal);font-weight:500;">↓ Sous le budget de ${fmtMoney(bp.budget - projectedPrimary, {noDec:true})} ${curSym()}</div>`;
       }
@@ -1617,10 +1738,33 @@ function renderStats() {
       <div class="stat-block">
         <h3>À ce rythme</h3>
         <div class="summary-tile" style="grid-column:1/-1">
-          <div class="lbl">Projection fin de séjour</div>
+          <div class="lbl">Projection espèces fin de séjour</div>
           <div class="v mono-num">${fmtMoney(projectedPrimary)} <small>${curSym()}</small></div>
           ${projectedEurStr ? `<div class="eur-equiv-sm" style="margin-top:4px">${projectedEurStr}</div>` : ''}
           ${projNote}
+        </div>
+      </div>
+    `;
+  }
+
+  // By payment method
+  const cashTotal = sumCash(state.expenses);
+  const cardTotal = sumCard(state.expenses);
+  let payHtml = '';
+  if (cardTotal > 0) {
+    const maxPay = Math.max(cashTotal, cardTotal, 1);
+    payHtml = `
+      <div class="stat-block">
+        <h3>Par mode de paiement</h3>
+        <div class="bar-row">
+          <div class="bar-label">💵 Espèces</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(cashTotal/maxPay*100).toFixed(1)}%"></div></div>
+          <div class="bar-amount mono-num">${fmtMoney(cashTotal)}</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">💳 Carte</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(cardTotal/maxPay*100).toFixed(1)}%; background: var(--coral);"></div></div>
+          <div class="bar-amount mono-num">${fmtMoney(cardTotal)}</div>
         </div>
       </div>
     `;
@@ -1649,9 +1793,10 @@ function renderStats() {
     </div>
 
     ${projHtml}
+    ${payHtml}
     ${hotelRows ? `<div class="stat-block"><h3>Par hôtel</h3>${hotelRows}</div>` : ''}
     ${catRows ? `<div class="stat-block"><h3>Par catégorie</h3>${catRows}</div>` : ''}
-    ${dailyHtml ? `<div class="stat-block"><h3>Jour par jour</h3>${dailyHtml}</div>` : ''}
+    ${dailyHtml ? `<div class="stat-block"><h3>Jour par jour${cardTotal>0?' <span style="font-size:11px;color:var(--muted);font-style:normal;font-family:Inter Tight,sans-serif;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;margin-left:6px;">Espèces</span>':''}</h3>${dailyHtml}</div>` : ''}
   `;
 }
 
@@ -1673,6 +1818,7 @@ function initTabs() {
    ===================================================== */
 let currentExpId = null;
 let selectedCat = 'resto';
+let selectedPayment = 'cash';
 
 function buildCatGrid() {
   const grid = document.getElementById('cat-grid');
@@ -1693,6 +1839,18 @@ function selectCat(id) {
   selectedCat = id;
   document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === id));
 }
+function buildPayToggle() {
+  document.querySelectorAll('.pay-opt').forEach(b => {
+    b.addEventListener('click', () => {
+      selectedPayment = b.dataset.pay;
+      document.querySelectorAll('.pay-opt').forEach(bb => bb.classList.toggle('active', bb.dataset.pay === selectedPayment));
+    });
+  });
+}
+function selectPayment(method) {
+  selectedPayment = (method === 'card') ? 'card' : 'cash';
+  document.querySelectorAll('.pay-opt').forEach(b => b.classList.toggle('active', b.dataset.pay === selectedPayment));
+}
 function buildHotelSelect() {
   const sel = document.getElementById('exp-hotel');
   sel.innerHTML = state.hotels.slice().sort((a,b)=>a.start.localeCompare(b.start))
@@ -1708,6 +1866,7 @@ function openAddExpense() {
   document.getElementById('exp-desc').value = '';
   document.getElementById('exp-cur').textContent = curSym();
   selectCat('resto');
+  selectPayment('cash');
   buildHotelSelect();
   // Auto-pick hotel for today
   const h = hotelForDate(todayISO());
@@ -1729,6 +1888,7 @@ function openEditExpense(id) {
   document.getElementById('exp-desc').value = e.description || '';
   document.getElementById('exp-cur').textContent = curSym();
   selectCat(e.category);
+  selectPayment(e.paymentMethod || 'cash');
   buildHotelSelect();
   document.getElementById('exp-hotel').value = e.hotelId;
   document.getElementById('exp-delete').style.display = '';
@@ -1766,12 +1926,13 @@ function saveExpense() {
   if (!date || !hotelId) return;
   if (currentExpId) {
     const e = state.expenses.find(x => x.id === currentExpId);
-    if (e) { e.amount = amount; e.date = date; e.hotelId = hotelId; e.description = description; e.category = selectedCat; }
+    if (e) { e.amount = amount; e.date = date; e.hotelId = hotelId; e.description = description; e.category = selectedCat; e.paymentMethod = selectedPayment; }
   } else {
     state.expenses.push({
       id: uid(),
       hotelId, date, amount,
       category: selectedCat,
+      paymentMethod: selectedPayment,
       description,
       createdAt: Date.now(),
     });
@@ -2064,6 +2225,7 @@ document.querySelectorAll('.modal-backdrop').forEach(m => {
 function init() {
   load();
   buildCatGrid();
+  buildPayToggle();
   initTabs();
   if (state.hotels && state.hotels.length) showApp();
   else showSetup();
